@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b0a0c">
+
+<title>YKREATO</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+
+<script src="script.js"></script>
+
+<style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+        --gold-100: #fbf3cf;
+        --gold-200: #f5e2a4;
+        --gold-300: #e8cd75;
+        --gold-400: #d4af37;
+        --gold-500: #b8942e;
+        --gold-600: #8f7122;
+        --ink-900: #050506;
+        --ink-800: #0b0a0c;
+        --ink-700: #14121a;
+        --cream: #f5f0e8;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--cream);
+        background: var(--ink-900);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        overflow-x: hidden;
+        position: relative;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- Background layers ---- */
+    .aura {
+        position: fixed; inset: -20%; z-index: 0; pointer-events: none;
+        background:
+            radial-gradient(circle at 20% 25%, rgba(212, 175, 55, 0.18) 0%, transparent 32%),
+            radial-gradient(circle at 80% 75%, rgba(212, 175, 55, 0.14) 0%, transparent 38%),
+            radial-gradient(circle at 50% 50%, rgba(143, 113, 34, 0.08) 0%, transparent 55%);
+        filter: blur(60px);
+        animation: auraFloat 22s ease-in-out infinite;
+    }
+    @keyframes auraFloat {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33%      { transform: translate(3%, -2%) scale(1.05); }
+        66%      { transform: translate(-2%, 3%) scale(0.98); }
+    }
+
+    .grain {
+        position: fixed; inset: 0; z-index: 1; pointer-events: none;
+        opacity: 0.05; mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>");
+    }
+
+    .gridlines {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image:
+            linear-gradient(rgba(212, 175, 55, 0.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(212, 175, 55, 0.035) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 75%);
+        -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 75%);
+    }
+
+    /* =========================================
+       MAIN APP CARD
+    ========================================= */
+    .app {
+        position: relative;
+        width: 100%;
+        max-width: 420px;
+        z-index: 2;
+        padding: 44px 34px 42px;
+        border-radius: 40px;
+        background: linear-gradient(180deg,
+            rgba(28, 25, 32, 0.72) 0%,
+            rgba(14, 12, 18, 0.82) 100%);
+        backdrop-filter: blur(28px) saturate(170%);
+        -webkit-backdrop-filter: blur(28px) saturate(170%);
+        border: 1px solid rgba(212, 175, 55, 0.22);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 -1px 0 rgba(0, 0, 0, 0.5) inset,
+            0 40px 80px -20px rgba(0, 0, 0, 0.9),
+            0 0 0 1px rgba(212, 175, 55, 0.06),
+            0 0 60px rgba(212, 175, 55, 0.10);
+        transform-style: preserve-3d;
+        transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        will-change: transform;
+        animation: cardEnter 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+    }
+    @keyframes cardEnter {
+        0%   { opacity: 0; transform: translateY(28px) scale(0.94); filter: blur(8px); }
+        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    .app::before {
+        content: ''; position: absolute; inset: 0; border-radius: 40px; padding: 1px;
+        background: linear-gradient(150deg,
+            rgba(251, 243, 207, 0.55) 0%,
+            rgba(212, 175, 55, 0.15) 25%,
+            transparent 50%,
+            rgba(212, 175, 55, 0.18) 75%,
+            rgba(251, 243, 207, 0.4) 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor; mask-composite: exclude;
+        pointer-events: none; opacity: 0.9;
+    }
+
+    .app::after {
+        content: ''; position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(251, 243, 207, 0.7) 50%, transparent 100%);
+        pointer-events: none; opacity: 0.8;
+    }
+
+    /* =========================================
+       SCREENS
+    ========================================= */
+    .screen { display: none; position: relative; z-index: 1; text-align: center; }
+    .screen.active { display: block; animation: fadeSlide 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+
+    @keyframes fadeSlide {
+        0%   { opacity: 0; transform: translateY(16px) scale(0.97); filter: blur(4px); }
+        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    /* =========================================
+       BRAND
+    ========================================= */
+    .brand-wrap {
+        position: relative; width: 92px; height: 92px; margin: 0 auto 22px;
+        display: grid; place-items: center;
+    }
+    .brand-ring {
+        position: absolute; inset: 0; border-radius: 28px;
+        background: conic-gradient(from 0deg,
+            rgba(251, 243, 207, 0.9),
+            rgba(212, 175, 55, 0.4),
+            rgba(143, 113, 34, 0.6),
+            rgba(212, 175, 55, 0.4),
+            rgba(251, 243, 207, 0.9));
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - 1.5px), #000 calc(100% - 1.5px));
+        animation: ringSpin 8s linear infinite; opacity: 0.85;
+    }
+    @keyframes ringSpin { to { transform: rotate(360deg); } }
+
+    .logo {
+        position: relative; width: 78px; height: 78px; object-fit: contain;
+        border-radius: 24px;
+        background: linear-gradient(145deg, #16141a, #0b0a0c);
+        padding: 8px;
+        border: 1px solid rgba(212, 175, 55, 0.28);
+        box-shadow:
+            0 12px 28px -8px rgba(0, 0, 0, 0.8),
+            0 0 24px rgba(212, 175, 55, 0.2) inset,
+            0 0 20px rgba(212, 175, 55, 0.15);
+        transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        z-index: 1;
+    }
+    .brand-wrap:hover .logo { transform: scale(1.06) rotate(-2deg); }
+
+    .eyebrow {
+        font-size: 10px; font-weight: 600; letter-spacing: 0.42em;
+        text-transform: uppercase; color: rgba(212, 175, 55, 0.7);
+        margin-bottom: 10px; padding-left: 0.42em;
+    }
+
+    h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 40px; font-weight: 600; letter-spacing: -0.015em;
+        line-height: 1.05; margin-bottom: 12px;
+        background: linear-gradient(135deg,
+            #fbf3cf 0%, #f5e2a4 25%, #d4af37 55%, #b8942e 80%, #8f7122 100%);
+        background-size: 200% 200%;
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        animation: goldShift 8s ease-in-out infinite;
+        text-shadow: 0 2px 24px rgba(212, 175, 55, 0.15);
+    }
+    @keyframes goldShift {
+        0%, 100% { background-position: 0% 50%; }
+        50%      { background-position: 100% 50%; }
+    }
+
+    .subtitle {
+        font-size: 13.5px; font-weight: 400;
+        color: rgba(245, 240, 232, 0.5);
+        letter-spacing: 0.01em; margin-bottom: 30px; line-height: 1.5;
+        padding: 0 8px;
+    }
+
+    .ornament {
+        display: flex; align-items: center; justify-content: center;
+        gap: 12px; margin: 0 auto 30px; width: 100%; max-width: 180px;
+    }
+    .ornament-line {
+        flex: 1; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+    }
+    .ornament-diamond {
+        width: 6px; height: 6px; background: var(--gold-400);
+        transform: rotate(45deg); box-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+    }
+
+    /* =========================================
+       HOME — TWO OPTION CARDS
+    ========================================= */
+    .home-options {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 6px;
+    }
+
+    .option-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 20px;
+        border-radius: 22px;
+        cursor: pointer;
+        text-align: left;
+
+        background: linear-gradient(180deg,
+            rgba(212, 175, 55, 0.06),
+            rgba(212, 175, 55, 0.02));
+        border: 1px solid rgba(212, 175, 55, 0.22);
+
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        overflow: hidden;
+    }
+
+    .option-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 22px;
+        padding: 1px;
+        background: linear-gradient(135deg,
+            rgba(251, 243, 207, 0.4) 0%,
+            transparent 40%,
+            transparent 60%,
+            rgba(212, 175, 55, 0.4) 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor; mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.5s;
+        pointer-events: none;
+    }
+
+    .option-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(212, 175, 55, 0.55);
+        background: linear-gradient(180deg,
+            rgba(212, 175, 55, 0.14),
+            rgba(212, 175, 55, 0.04));
+        box-shadow:
+            0 22px 44px -18px rgba(212, 175, 55, 0.55),
+            0 0 0 1px rgba(251, 243, 207, 0.15);
+    }
+    .option-card:hover::before { opacity: 1; }
+    .option-card:active { transform: scale(0.98); }
+
+    .option-icon {
+        flex-shrink: 0;
+        width: 54px; height: 54px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(145deg, #16141a, #0b0a0c);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        box-shadow:
+            0 0 20px rgba(212, 175, 55, 0.15) inset,
+            0 6px 14px -6px rgba(0, 0, 0, 0.8);
+    }
+    .option-icon svg {
+        width: 26px; height: 26px;
+        stroke: var(--gold-300);
+        fill: none;
+        stroke-width: 1.6;
+    }
+
+    .option-text { flex: 1; min-width: 0; }
+
+    .option-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+        background: linear-gradient(135deg, #fbf3cf, #e8cd75 40%, #d4af37 100%);
+        -webkit-background-clip: text; background-clip: text;
+        color: transparent;
+        margin-bottom: 4px;
+        line-height: 1.1;
+    }
+
+    .option-desc {
+        font-size: 11.5px;
+        font-weight: 400;
+        color: rgba(245, 240, 232, 0.45);
+        letter-spacing: 0.01em;
+        line-height: 1.4;
+    }
+
+    .option-arrow {
+        flex-shrink: 0;
+        color: rgba(212, 175, 55, 0.6);
+        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .option-arrow svg {
+        width: 18px; height: 18px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2.2;
+    }
+    .option-card:hover .option-arrow {
+        transform: translateX(4px);
+        color: var(--gold-300);
+    }
+
+    /* =========================================
+       FIELDS
+    ========================================= */
+    .field { text-align: left; margin-bottom: 18px; position: relative; }
+    .field-label {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 10px; padding-left: 4px; padding-right: 4px;
+    }
+    label {
+        font-size: 10.5px; font-weight: 600; letter-spacing: 0.22em;
+        text-transform: uppercase; color: rgba(212, 175, 55, 0.85);
+    }
+    .field-hint {
+        font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+        color: rgba(245, 240, 232, 0.25); text-transform: uppercase;
+    }
+
+    .input-wrap {
+        position: relative; border-radius: 18px; padding: 1px;
+        background: linear-gradient(135deg,
+            rgba(212, 175, 55, 0.25),
+            rgba(212, 175, 55, 0.05) 40%,
+            rgba(212, 175, 55, 0.05) 60%,
+            rgba(212, 175, 55, 0.25));
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .input-wrap:focus-within {
+        background: linear-gradient(135deg,
+            rgba(251, 243, 207, 0.9),
+            rgba(212, 175, 55, 0.4) 40%,
+            rgba(212, 175, 55, 0.4) 60%,
+            rgba(251, 243, 207, 0.9));
+        box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1),
+                    0 12px 32px -10px rgba(212, 175, 55, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .input-inner {
+        position: relative; display: flex; align-items: center;
+        background: linear-gradient(180deg, rgba(20, 18, 26, 0.9), rgba(11, 10, 12, 0.95));
+        border-radius: 17px; overflow: hidden;
+    }
+
+    .input-prefix {
+        padding: 0 4px 0 18px; font-size: 17px; font-weight: 500;
+        color: rgba(212, 175, 55, 0.75); user-select: none;
+        font-family: 'Playfair Display', serif;
+    }
+
+    input, textarea {
+        width: 100%; height: 56px; background: transparent; border: none;
+        padding: 0 18px; font-size: 15.5px; font-weight: 500;
+        color: var(--cream); outline: none;
+        font-family: 'Inter', sans-serif; letter-spacing: 0.01em;
+        caret-color: var(--gold-400);
+    }
+    textarea {
+        height: auto; min-height: 68px; padding: 15px 18px;
+        resize: vertical; line-height: 1.5;
+    }
+    .input-inner.has-prefix input { padding-left: 6px; }
+
+    input::placeholder, textarea::placeholder {
+        color: rgba(245, 240, 232, 0.22); font-weight: 400;
+    }
+
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+        -webkit-appearance: none; margin: 0;
+    }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .input-wrap.input-error {
+        background: linear-gradient(135deg,
+            rgba(224, 82, 82, 0.8),
+            rgba(224, 82, 82, 0.3));
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%      { transform: translateX(-8px); }
+        40%      { transform: translateX(8px); }
+        60%      { transform: translateX(-5px); }
+        80%      { transform: translateX(5px); }
+    }
+
+    /* =========================================
+       GOLD BUTTON
+    ========================================= */
+    .generate {
+        position: relative; width: 100%; height: 60px; margin-top: 16px;
+        border: none; border-radius: 18px; cursor: pointer;
+        font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+        letter-spacing: 0.18em; text-transform: uppercase; color: #0b0a0c;
+        background: linear-gradient(135deg,
+            #fbf3cf 0%, #e8cd75 20%, #d4af37 50%, #b8942e 80%, #8f7122 100%);
+        background-size: 200% 200%;
+        animation: goldShift 6s ease-in-out infinite;
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.5) inset,
+            0 -1px 0 rgba(0, 0, 0, 0.25) inset,
+            0 18px 40px -14px rgba(212, 175, 55, 0.65),
+            0 0 0 1px rgba(212, 175, 55, 0.35);
+        overflow: hidden;
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        isolation: isolate;
+    }
+    .generate::before {
+        content: ''; position: absolute; top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+        transition: left 0.8s cubic-bezier(0.23, 1, 0.32, 1); z-index: 1;
+    }
+    .generate:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.6) inset,
+            0 -1px 0 rgba(0, 0, 0, 0.3) inset,
+            0 28px 56px -16px rgba(212, 175, 55, 0.85),
+            0 0 0 1px rgba(251, 243, 207, 0.6);
+        letter-spacing: 0.22em;
+    }
+    .generate:hover::before { left: 100%; }
+    .generate:active { transform: scale(0.98) translateY(0); }
+    .generate span {
+        position: relative; z-index: 2;
+        display: inline-flex; align-items: center; gap: 10px;
+    }
+    .generate svg {
+        width: 14px; height: 14px;
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .generate:hover svg { transform: translateX(4px); }
+    .generate:disabled {
+        opacity: 0.45; cursor: not-allowed;
+        filter: grayscale(0.4);
+        transform: none !important;
+    }
+
+    /* =========================================
+       QR BOX
+    ========================================= */
+    .qr-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px; font-weight: 500; letter-spacing: -0.01em;
+        text-align: center;
+        background: linear-gradient(135deg, #fbf3cf, #d4af37);
+        -webkit-background-clip: text; background-clip: text;
+        color: transparent; margin-bottom: 4px;
+    }
+    .qr-sub {
+        font-size: 10.5px; font-weight: 600; letter-spacing: 0.32em;
+        text-transform: uppercase; color: rgba(212, 175, 55, 0.6);
+        text-align: center; margin-bottom: 26px;
+    }
+
+    .qr-box {
+        position: relative; width: 310px; height: 310px; margin: 0 auto;
+        padding: 10px; border-radius: 22px;
+        background: #ffffff;
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        box-shadow:
+            0 30px 60px -18px rgba(0, 0, 0, 0.9),
+            0 0 50px rgba(212, 175, 55, 0.18),
+            0 0 0 1px rgba(212, 175, 55, 0.1);
+    }
+    .qr-box::before, .qr-box::after {
+        content: ''; position: absolute; width: 22px; height: 22px;
+        border: 1.5px solid rgba(212, 175, 55, 0.75); pointer-events: none;
+    }
+    .qr-box::before {
+        top: -1px; left: -1px;
+        border-right: none; border-bottom: none; border-top-left-radius: 22px;
+    }
+    .qr-box::after {
+        bottom: -1px; right: -1px;
+        border-left: none; border-top: none; border-bottom-right-radius: 22px;
+    }
+
+    #qrcode, #waQrcode { width: 290px; height: 290px; display: block; }
+    #qrcode canvas, #qrcode img,
+    #waQrcode canvas, #waQrcode img {
+        width: 290px !important; height: 290px !important; display: block;
+    }
+
+    .qr-logo-wrap {
+        position: absolute; width: 24.7%; aspect-ratio: 1 / 1;
+        left: 50%; top: 50%; transform: translate(-50%, -50%);
+        display: grid; place-items: center; pointer-events: none; z-index: 2;
+    }
+    .qr-logo-ring {
+        position: absolute; inset: 0; border-radius: 50%;
+        background: conic-gradient(from 0deg,
+            rgba(251, 243, 207, 0.95),
+            rgba(212, 175, 55, 0.45),
+            rgba(143, 113, 34, 0.65),
+            rgba(212, 175, 55, 0.45),
+            rgba(251, 243, 207, 0.95));
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 2px));
+        animation: ringSpin 8s linear infinite;
+    }
+    .qr-logo {
+        position: relative; width: 100%; height: 100%;
+        background: #ffffff; padding: 7.2px; border-radius: 50%;
+        object-fit: contain;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        z-index: 1;
+    }
+    .qr-logo-wrap:hover .qr-logo { transform: scale(1.06); }
+
+    .amount {
+        margin-top: 26px;
+        font-family: 'Playfair Display', serif;
+        font-size: 42px; font-weight: 600; letter-spacing: -0.02em;
+        text-align: center; line-height: 1;
+        background: linear-gradient(135deg,
+            #fbf3cf 0%, #e8cd75 30%, #d4af37 55%, #b8942e 100%);
+        background-size: 200% 200%;
+        -webkit-background-clip: text; background-clip: text;
+        color: transparent;
+        animation: goldShift 7s ease-in-out infinite;
+        word-break: break-word;
+    }
+
+    .message {
+        margin-top: 10px; font-size: 13.5px; font-weight: 400;
+        font-style: italic; color: rgba(245, 240, 232, 0.55);
+        text-align: center; word-break: break-word; line-height: 1.5;
+        padding: 0 12px; letter-spacing: 0.005em;
+    }
+
+    .qr-divider {
+        display: flex; align-items: center; justify-content: center;
+        gap: 12px; margin: 28px auto 22px; width: 100%; max-width: 160px;
+    }
+    .qr-divider .ornament-line {
+        flex: 1; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.4), transparent);
+    }
+    .qr-divider .ornament-diamond {
+        width: 5px; height: 5px; background: var(--gold-400);
+        transform: rotate(45deg);
+    }
+
+    /* =========================================
+       BACK BUTTON
+    ========================================= */
+    .back {
+        display: flex; align-items: center; justify-content: center;
+        gap: 10px; margin: 22px auto 0; padding: 13px 26px;
+        border-radius: 999px;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        background: linear-gradient(180deg,
+            rgba(212, 175, 55, 0.08),
+            rgba(212, 175, 55, 0.02));
+        color: rgba(245, 226, 164, 0.95);
+        font-family: 'Inter', sans-serif;
+        font-size: 12px; font-weight: 600;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        cursor: pointer;
+        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .back svg {
+        width: 12px; height: 12px;
+        transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .back:hover {
+        color: #fbf3cf; border-color: rgba(212, 175, 55, 0.7);
+        background: linear-gradient(180deg,
+            rgba(212, 175, 55, 0.18),
+            rgba(212, 175, 55, 0.06));
+        box-shadow: 0 14px 36px -14px rgba(212, 175, 55, 0.5);
+        transform: translateY(-2px);
+        letter-spacing: 0.22em;
+    }
+    .back:hover svg { transform: translateX(-4px); }
+    .back:active { transform: scale(0.97) translateY(0); }
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+    @media (max-width: 420px) {
+        .app { padding: 36px 24px 34px; border-radius: 34px; }
+        h1 { font-size: 34px; }
+        .brand-wrap { width: 84px; height: 84px; }
+        .logo { width: 70px; height: 70px; border-radius: 22px; }
+
+        .qr-box { width: 270px; height: 270px; }
+        #qrcode, #qrcode canvas, #qrcode img,
+        #waQrcode, #waQrcode canvas, #waQrcode img {
+            width: 250px !important; height: 250px !important;
+        }
+        .qr-logo { padding: 6.5px; }
+        .amount { font-size: 36px; }
+        .qr-title { font-size: 22px; }
+    }
+
+    @media (max-width: 360px) {
+        .app { padding: 30px 18px 28px; border-radius: 30px; }
+        h1 { font-size: 30px; }
+        .qr-box { width: 250px; height: 250px; }
+        #qrcode, #qrcode canvas, #qrcode img,
+        #waQrcode, #waQrcode canvas, #waQrcode img {
+            width: 230px !important; height: 230px !important;
+        }
+        .qr-logo { padding: 5.5px; }
+        .amount { font-size: 32px; }
+        .generate { height: 56px; font-size: 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+    <div class="aura"></div>
+    <div class="gridlines"></div>
+    <div class="grain"></div>
+
+    <div class="app" id="appContainer">
+
+        <!-- ============================================
+             SCREEN : HOME  (two options)
+        ============================================ -->
+        <div id="homeScreen" class="screen active">
+
+            <div class="brand-wrap">
+                <div class="brand-ring"></div>
+                <img src="brand.png" class="logo" alt="Brand">
+            </div>
+
+            <div class="eyebrow"> ·YKREATO· </div>
+            <h1>Choose</h1>
+            <div class="subtitle">
+                Two ways to connect — pick the one you need.
+            </div>
+
+            <div class="ornament">
+                <div class="ornament-line"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+
+            <div class="home-options">
+
+                <!-- Option 1 : UPI QR -->
+                <div class="option-card" id="goUpi" role="button" tabindex="0">
+                    <div class="option-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.2"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1.2"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1.2"/>
+                            <path d="M14 14h3v3h-3z"/>
+                            <path d="M21 14v3M18 21h3M14 21h1"/>
+                        </svg>
+                    </div>
+                    <div class="option-text">
+                        <div class="option-title">UPI QR</div>
+                        <div class="option-desc">Enter amount & note — generate a scannable payment QR.</div>
+                    </div>
+                    <div class="option-arrow">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Option 2 : WhatsApp Form -->
+                <div class="option-card" id="goWa" role="button" tabindex="0">
+                    <div class="option-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        </svg>
+                    </div>
+                    <div class="option-text">
+                        <div class="option-title">WhatsApp Form</div>
+                        <div class="option-desc">Show a QR — scanned phone fills the form & sends to WhatsApp.</div>
+                    </div>
+                    <div class="option-arrow">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ============================================
+             SCREEN : UPI — INPUT
+        ============================================ -->
+        <div id="upiInputScreen" class="screen">
+            <div class="brand-wrap">
+                <div class="brand-ring"></div>
+                <img src="brand.png" class="logo" alt="Brand">
+            </div>
+
+            <div class="eyebrow"> ·YKREATO· </div>
+            <h1>Payment QR</h1>
+
+            <div class="ornament">
+                <div class="ornament-line"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="amount">Amount</label>
+                    <span class="field-hint">INR</span>
+                </div>
+                <div class="input-wrap" id="amountWrap">
+                    <div class="input-inner has-prefix">
+                        <span class="input-prefix">₹</span>
+                        <input id="amount" type="number" inputmode="decimal" placeholder="0.00" min="1" step="0.01" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="message">Note</label>
+                    <span class="field-hint">Optional</span>
+                </div>
+                <div class="input-wrap">
+                    <div class="input-inner">
+                        <input id="message" type="text" placeholder="What is this payment for?" maxlength="100" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <button class="generate" id="generateBtn">
+                <span>
+                    Generate QR
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </span>
+            </button>
+
+            <button class="back" id="upiBackHomeBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Home
+            </button>
+        </div>
+
+        <!-- ============================================
+             SCREEN : UPI — QR RESULT
+        ============================================ -->
+        <div id="upiQrScreen" class="screen">
+            <div class="qr-title">Scan to Pay</div>
+            <div class="qr-sub">Point your camera</div>
+
+            <div class="qr-box">
+                <div id="qrcode"></div>
+                <div class="qr-logo-wrap">
+                    <div class="qr-logo-ring"></div>
+                    <img src="brand.png" class="qr-logo" alt="Brand">
+                </div>
+            </div>
+
+            <div class="amount" id="showAmount"></div>
+            <div class="message" id="showMessage"></div>
+
+            <div class="qr-divider">
+                <div class="ornament-line"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+
+            <button class="back" id="upiEditBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Create another
+            </button>
+        </div>
+
+        <!-- ============================================
+             SCREEN : WHATSAPP — QR ENTRY (desktop view)
+        ============================================ -->
+        <div id="waQrEntryScreen" class="screen">
+            <div class="brand-wrap">
+                <div class="brand-ring"></div>
+                <img src="brand.png" class="logo" alt="Brand">
+            </div>
+
+            <div class="eyebrow"> ·YKREATO· </div>
+            <h1>Scan to Connect</h1>
+            <div class="subtitle">
+                Scan this QR with your phone — the form will open there, ready to send us your details on WhatsApp.
+            </div>
+
+            <div class="ornament">
+                <div class="ornament-line"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+
+            <div class="qr-box">
+                <div id="waQrcode"></div>
+                <div class="qr-logo-wrap">
+                    <div class="qr-logo-ring"></div>
+                    <img src="brand.png" class="qr-logo" alt="Brand">
+                </div>
+            </div>
+
+            <div class="qr-sub" style="margin-top:22px; margin-bottom:0;">
+                Point your camera
+            </div>
+
+            <button class="back" id="waQrBackBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Home
+            </button>
+        </div>
+
+        <!-- ============================================
+             SCREEN : WHATSAPP — FORM (opens on scanned phone)
+        ============================================ -->
+        <div id="waFormScreen" class="screen">
+            <div class="brand-wrap">
+                <div class="brand-ring"></div>
+                <img src="brand.png" class="logo" alt="Brand">
+            </div>
+
+            <div class="eyebrow"> ·YKREATO· </div>
+            <h1>Your Details</h1>
+            <div class="subtitle">
+                Fill in the form below — tap Send and WhatsApp opens with everything pre-filled for you.
+            </div>
+
+            <div class="ornament">
+                <div class="ornament-line"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="waName">Name</label>
+                    <span class="field-hint">Required</span>
+                </div>
+                <div class="input-wrap" id="waNameWrap">
+                    <div class="input-inner">
+                        <input id="waName" type="text" placeholder="Your full name" autocomplete="name" maxlength="60">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="waBusiness">Business you operate</label>
+                    <span class="field-hint">Required</span>
+                </div>
+                <div class="input-wrap" id="waBusinessWrap">
+                    <div class="input-inner">
+                        <input id="waBusiness" type="text" placeholder="What you operate" autocomplete="organization" maxlength="60">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="waContact">Contact</label>
+                    <span class="field-hint">Phone</span>
+                </div>
+                <div class="input-wrap" id="waContactWrap">
+                    <div class="input-inner">
+                        <input id="waContact" type="tel" placeholder="Your phone number" autocomplete="tel" maxlength="20">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="waGmail">Gmail</label>
+                    <span class="field-hint">Email</span>
+                </div>
+                <div class="input-wrap" id="waGmailWrap">
+                    <div class="input-inner">
+                        <input id="waGmail" type="email" placeholder="name@gmail.com" autocomplete="email" maxlength="80">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="waAddress">Address</label>
+                    <span class="field-hint">Required</span>
+                </div>
+                <div class="input-wrap" id="waAddressWrap">
+                    <div class="input-inner">
+                        <textarea id="waAddress" placeholder="Street, city, pincode…" rows="2" maxlength="160"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <div class="field-label">
+                    <label for="waGoal">Main goal</label>
+                    <span class="field-hint">What you want</span>
+                </div>
+                <div class="input-wrap" id="waGoalWrap">
+                    <div class="input-inner">
+                        <textarea id="waGoal" placeholder="e.g. expand business, get leads…" rows="2" maxlength="160"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button class="generate" id="waSendBtn" disabled>
+                <span>
+                    Send on WhatsApp
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </span>
+            </button>
+
+            <button class="back" id="waFormBackBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </button>
+        </div>
+
+    </div>
+
+<script>
+/* =====================================================================
+   CONFIG
+   ===================================================================== */
+const WHATSAPP_NUMBER = "917301214552";   // +91 7301214552
+const UPI_ID          = "ykreato@upi";
+
+/* =====================================================================
+   DOM
+   ===================================================================== */
+const appCard = document.getElementById('appContainer');
+
+const homeScreen      = document.getElementById('homeScreen');
+const upiInputScreen  = document.getElementById('upiInputScreen');
+const upiQrScreen     = document.getElementById('upiQrScreen');
+const waQrEntryScreen = document.getElementById('waQrEntryScreen');
+const waFormScreen    = document.getElementById('waFormScreen');
+
+const allScreens = [homeScreen, upiInputScreen, upiQrScreen, waQrEntryScreen, waFormScreen];
+
+function showScreen(el) {
+    allScreens.forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    el.style.display = '';
+    el.classList.add('active');
+    // card pulse
+    appCard.style.transform = "scale(0.995)";
+    setTimeout(() => { appCard.style.transform = "scale(1)"; }, 240);
+}
+
+/* =====================================================================
+   ROUTER  (hash based)
+   - "" / "#home"   -> home
+   - "#upi"         -> UPI input
+   - "#wa"          -> WhatsApp QR entry
+   - "#form"        -> WhatsApp form (this is what the QR encodes)
+   ===================================================================== */
+function route() {
+    const h = (window.location.hash || '#home').toLowerCase();
+
+    if (h === '#upi') {
+        showScreen(upiInputScreen);
+        setTimeout(() => amountInput && amountInput.focus(), 250);
+    } else if (h === '#wa') {
+        showScreen(waQrEntryScreen);
+        renderWaEntryQr();
+    } else if (h === '#form') {
+        showScreen(waFormScreen);
+        setTimeout(() => waName && waName.focus(), 250);
+    } else {
+        showScreen(homeScreen);
+    }
+}
+window.addEventListener('hashchange', route);
+
+function goto(hash) {
+    if (window.location.hash === hash) {
+        route();
+    } else {
+        window.location.hash = hash;
+    }
+}
+
+/* =====================================================================
+   HOME BUTTONS
+   ===================================================================== */
+document.getElementById('goUpi').addEventListener('click', () => goto('#upi'));
+document.getElementById('goWa').addEventListener('click',  () => goto('#wa'));
+
+/* keyboard access */
+['goUpi', 'goWa'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+    });
+});
+
+/* =====================================================================
+   UPI MODE — exactly your original logic
+   ===================================================================== */
+const amountInput  = document.getElementById('amount');
+const amountWrap   = document.getElementById('amountWrap');
+const messageInput = document.getElementById('message');
+const generateBtn  = document.getElementById('generateBtn');
+const upiEditBtn   = document.getElementById('upiEditBtn');
+const upiBackHome  = document.getElementById('upiBackHomeBtn');
+const qrContainer  = document.getElementById('qrcode');
+const showAmount   = document.getElementById('showAmount');
+const showMessage  = document.getElementById('showMessage');
+
+generateBtn.addEventListener('click', () => {
+    const amount  = amountInput.value.trim();
+    const message = messageInput.value.trim();
+
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+        amountInput.focus();
+        amountWrap.classList.add('input-error');
+        setTimeout(() => amountWrap.classList.remove('input-error'), 650);
+        return;
+    }
+
+    let upiURL =
+        "upi://pay" +
+        "?pa=" + encodeURIComponent(UPI_ID) +
+        "&am=" + encodeURIComponent(Number(amount).toFixed(2)) +
+        "&cu=INR";
+    if (message) upiURL += "&tn=" + encodeURIComponent(message);
+
+    qrContainer.innerHTML = "";
+    new QRCode(qrContainer, {
+        text: upiURL,
+        width: 290,
+        height: 290,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    showAmount.textContent = "₹" + Number(amount).toLocaleString("en-IN", {
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+    showMessage.textContent = message || "Payment";
+
+    showScreen(upiQrScreen);
+});
+
+upiEditBtn.addEventListener('click', () => {
+    showScreen(upiInputScreen);
+    amountInput.focus();
+});
+
+upiBackHome.addEventListener('click', () => goto('#home'));
+
+amountInput.addEventListener('keydown',  e => { if (e.key === 'Enter') { e.preventDefault(); generateBtn.click(); } });
+messageInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); generateBtn.click(); } });
+amountInput.addEventListener('input', () => amountWrap.classList.remove('input-error'));
+
+/* =====================================================================
+   WHATSAPP MODE
+   ===================================================================== */
+const waQrcodeEl  = document.getElementById('waQrcode');
+const waQrBackBtn = document.getElementById('waQrBackBtn');
+
+const waName     = document.getElementById('waName');
+const waBusiness = document.getElementById('waBusiness');
+const waContact  = document.getElementById('waContact');
+const waGmail    = document.getElementById('waGmail');
+const waAddress  = document.getElementById('waAddress');
+const waGoal     = document.getElementById('waGoal');
+
+const waFields = [waName, waBusiness, waContact, waGmail, waAddress, waGoal];
+const waWraps = {
+    waName:     document.getElementById('waNameWrap'),
+    waBusiness: document.getElementById('waBusinessWrap'),
+    waContact:  document.getElementById('waContactWrap'),
+    waGmail:    document.getElementById('waGmailWrap'),
+    waAddress:  document.getElementById('waAddressWrap'),
+    waGoal:     document.getElementById('waGoalWrap')
+};
+
+const waSendBtn     = document.getElementById('waSendBtn');
+const waFormBackBtn = document.getElementById('waFormBackBtn');
+
+/* Build the target URL for the WA entry QR = current page + "#form" */
+function buildWaFormUrl() {
+    return window.location.origin + window.location.pathname + '#form';
+}
+
+function renderWaEntryQr() {
+    waQrcodeEl.innerHTML = '';
+    new QRCode(waQrcodeEl, {
+        text: buildWaFormUrl(),
+        width: 290,
+        height: 290,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+waQrBackBtn.addEventListener('click', () => goto('#home'));
+
+/* Validation */
+function waAllFilled() {
+    return waFields.every(f => f.value.trim() !== '');
+}
+function waUpdateSendBtn() {
+    waSendBtn.disabled = !waAllFilled();
+}
+waFields.forEach(f => {
+    f.addEventListener('input', () => {
+        waUpdateSendBtn();
+        const wrap = waWraps[f.id];
+        if (wrap) wrap.classList.remove('input-error');
+    });
+});
+waUpdateSendBtn();
+
+/* Build the WhatsApp message text */
+function buildWaMessage() {
+    const name     = waName.value.trim();
+    const business = waBusiness.value.trim();
+    const contact  = waContact.value.trim();
+    const gmail    = waGmail.value.trim();
+    const address  = waAddress.value.trim();
+    const goal     = waGoal.value.trim();
+
+    return [
+        '📌 *New form submission*',
+        '',
+        `*Name:* ${name}`,
+        `*Business:* ${business}`,
+        `*Contact:* ${contact}`,
+        `*Gmail:* ${gmail}`,
+        `*Address:* ${address}`,
+        `*Main goal:* ${goal}`,
+        '',
+        '— sent via YKREATO website'
+    ].join('\n');
+}
+
+/* Send */
+waSendBtn.addEventListener('click', () => {
+    let firstEmpty = null;
+    waFields.forEach(f => {
+        if (f.value.trim() === '') {
+            if (!firstEmpty) firstEmpty = f;
+            const wrap = waWraps[f.id];
+            if (wrap) {
+                wrap.classList.add('input-error');
+                setTimeout(() => wrap.classList.remove('input-error'), 700);
+            }
+        }
+    });
+    if (firstEmpty) { firstEmpty.focus(); return; }
+
+    const text = buildWaMessage();
+    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
+});
+
+/* Form back button — go to home */
+waFormBackBtn.addEventListener('click', () => goto('#home'));
+
+/* =====================================================================
+   ENTER KEY on WA single-line inputs -> focus next / try send
+   ===================================================================== */
+[waName, waBusiness, waContact, waGmail].forEach(f => {
+    f.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (waAllFilled()) waSendBtn.click();
+        }
+    });
+});
+
+/* =====================================================================
+   DESKTOP 3D TILT (kept from original)
+   ===================================================================== */
+if (window.matchMedia("(pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let rafId = null;
+    document.addEventListener("mousemove", e => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+            const rect = appCard.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width  - 0.5;
+            const y = (e.clientY - rect.top)  / rect.height - 0.5;
+            appCard.style.transform =
+                `perspective(1500px) rotateY(${x * 1.8}deg) rotateX(${-y * 1.8}deg)`;
+        });
+    });
+    document.addEventListener("mouseleave", () => {
+        appCard.style.transform = "perspective(1500px) rotateY(0deg) rotateX(0deg)";
+    });
+}
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+window.addEventListener('load', () => {
+    // If the user opened with no hash at all, normalize to #home (keeps URL tidy)
+    if (!window.location.hash) {
+        history.replaceState('', document.title, window.location.pathname + window.location.search + '#home');
+    }
+    route();
+
+    // pre-render the WA QR in the background so it's instant when shown
+    renderWaEntryQr();
+});
+</script>
+
+</body>
+</html>
