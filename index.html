@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0b0a0c">
 
-<title>YKREATO - Digital Marketing Agency </title>
+<title>YKREATO - Digital Marketing Agency</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
@@ -515,9 +516,9 @@
         border-left: none; border-top: none; border-bottom-right-radius: 22px;
     }
 
-    #qrcode, #connectQrcode { width: 290px; height: 290px; display: block; }
+    #qrcode, #waQrcode { width: 290px; height: 290px; display: block; }
     #qrcode canvas, #qrcode img,
-    #connectQrcode canvas, #connectQrcode img {
+    #waQrcode canvas, #waQrcode img {
         width: 290px !important; height: 290px !important; display: block;
     }
 
@@ -628,7 +629,7 @@
 
         .qr-box { width: 270px; height: 270px; }
         #qrcode, #qrcode canvas, #qrcode img,
-        #connectQrcode, #connectQrcode canvas, #connectQrcode img {
+        #waQrcode, #waQrcode canvas, #waQrcode img {
             width: 250px !important; height: 250px !important;
         }
         .qr-logo { padding: 6.5px; }
@@ -641,7 +642,7 @@
         h1 { font-size: 30px; }
         .qr-box { width: 250px; height: 250px; }
         #qrcode, #qrcode canvas, #qrcode img,
-        #connectQrcode, #connectQrcode canvas, #connectQrcode img {
+        #waQrcode, #waQrcode canvas, #waQrcode img {
             width: 230px !important; height: 230px !important;
         }
         .qr-logo { padding: 5.5px; }
@@ -1014,17 +1015,17 @@ function showScreen(el) {
 /* =====================================================================
    ROUTER  (hash based)
    - "" / "#home"   -> home
-   - "#payment"         -> UPI input
-   - "#connect"          -> WhatsApp QR entry
+   - "#upi"         -> UPI input
+   - "#wa"          -> WhatsApp QR entry
    - "#form"        -> WhatsApp form (this is what the QR encodes)
    ===================================================================== */
 function route() {
     const h = (window.location.hash || '#home').toLowerCase();
 
-    if (h === '#payment') {
+    if (h === '#upi') {
         showScreen(upiInputScreen);
         setTimeout(() => amountInput && amountInput.focus(), 250);
-    } else if (h === '#connect') {
+    } else if (h === '#wa') {
         showScreen(waQrEntryScreen);
         renderWaEntryQr();
     } else if (h === '#form') {
@@ -1047,8 +1048,8 @@ function goto(hash) {
 /* =====================================================================
    HOME BUTTONS
    ===================================================================== */
-document.getElementById('goUpi').addEventListener('click', () => goto('#payment'));
-document.getElementById('goWa').addEventListener('click',  () => goto('#connect'));
+document.getElementById('goUpi').addEventListener('click', () => goto('#upi'));
+document.getElementById('goWa').addEventListener('click',  () => goto('#wa'));
 
 /* keyboard access */
 ['goUpi', 'goWa'].forEach(id => {
