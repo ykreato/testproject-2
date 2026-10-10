@@ -1273,6 +1273,29 @@ window.addEventListener('load', () => {
     renderWaEntryQr();
 });
 </script>
-
+<script>
+  (function() {
+    // Replace with your actual Web App URL from Step 1
+    var scriptUrl = 'YOUR_WEB_APP_URL_HERE';
+    
+    // Get the current page path (e.g., /home or /contact)
+    var pagePath = window.location.pathname;
+    
+    // Get user's browser info
+    var userAgent = navigator.userAgent;
+    
+    // Get where they came from
+    var referrer = document.referrer || 'Direct';
+    
+    // Build the request URL with parameters
+    var url = scriptUrl + '?page=' + encodeURIComponent(pagePath) + 
+              '&ua=' + encodeURIComponent(userAgent) + 
+              '&ref=' + encodeURIComponent(referrer);
+    
+    // Send the request silently using a tiny image
+    var img = new Image();
+    img.src = url;
+  })();
+</script>
 </body>
 </html>
