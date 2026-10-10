@@ -1275,8 +1275,8 @@ window.addEventListener('load', () => {
 </script>
 <script>
   (function () {
-    // 👇 REPLACE THIS WITH YOUR WEB APP URL
-    var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYCnoku5vbmq3vQxvkAe1hsbQPABLChCARiVPpQW7iBvpfFMnhYr-QOWWdXwewHfEj/exec';
+    // 👇 PASTE YOUR WEB APP URL HERE
+    var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyk8Drazh0NtIpIJN9IzMaNojn-F1__1ZWHZTcv0yOKuAigJPuDLLZqjexw5rCdY-fg/exec';
 
     var params = new URLSearchParams({
       page: window.location.pathname,
@@ -1284,7 +1284,6 @@ window.addEventListener('load', () => {
       ref:  document.referrer || 'Direct'
     });
 
-    // Silent ping (no page reload, no visible image)
     var img = new Image();
     img.src = SCRIPT_URL + '?' + params.toString();
   })();
