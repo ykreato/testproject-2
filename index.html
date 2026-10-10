@@ -1274,28 +1274,21 @@ window.addEventListener('load', () => {
 });
 </script>
 <script>
-  (function() {
-    // Replace with your actual Web App URL from Step 1
-    var scriptUrl = 'YOUR_WEB_APP_URL_HERE';
-    
-    // Get the current page path (e.g., /home or /contact)
-    var pagePath = window.location.pathname;
-    
-    // Get user's browser info
-    var userAgent = navigator.userAgent;
-    
-    // Get where they came from
-    var referrer = document.referrer || 'Direct';
-    
-    // Build the request URL with parameters
-    var url = scriptUrl + '?page=' + encodeURIComponent(pagePath) + 
-              '&ua=' + encodeURIComponent(userAgent) + 
-              '&ref=' + encodeURIComponent(referrer);
-    
-    // Send the request silently using a tiny image
+  (function () {
+    // 👇 REPLACE THIS WITH YOUR WEB APP URL
+    var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwYCnoku5vbmq3vQxvkAe1hsbQPABLChCARiVPpQW7iBvpfFMnhYr-QOWWdXwewHfEj/exec';
+
+    var params = new URLSearchParams({
+      page: window.location.pathname,
+      ua:   navigator.userAgent,
+      ref:  document.referrer || 'Direct'
+    });
+
+    // Silent ping (no page reload, no visible image)
     var img = new Image();
-    img.src = url;
+    img.src = SCRIPT_URL + '?' + params.toString();
   })();
 </script>
+</body>
 </body>
 </html>
