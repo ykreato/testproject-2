@@ -1273,20 +1273,125 @@ window.addEventListener('load', () => {
     renderWaEntryQr();
 });
 </script>
-<script>
-  (function () {
-    // 👇 PASTE YOUR WEB APP URL HERE
-    var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyk8Drazh0NtIpIJN9IzMaNojn-F1__1ZWHZTcv0yOKuAigJPuDLLZqjexw5rCdY-fg/exec';
+  <script>
+(function () {
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyk8Drazh0NtIpIJN9IzMaNojn-F1__1ZWHZTcv0yOKuAigJPuDLLZqjexw5rCdY-fg/exec';
 
+  // -------- IDs --------
+  var visitorId = localStorage.getItem('vid');
+  if (!visitorId) {
+    visitorId = 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('vid', visitorId);
+  }
+  var sessionId = sessionStorage.getItem('sid');
+  if (!sessionId) {
+    sessionId = 's_' + Math.random().toString(36).slice(2);
+    sessionStorage.setItem('sid', sessionId);
+  }
+
+  // -------- Core send function --------
+  function send(event, opts) {
+    opts = opts || {};
     var params = new URLSearchParams({
-      page: window.location.pathname,
-      ua:   navigator.userAgent,
-      ref:  document.referrer || 'Direct'
+      vid:   visitorId,
+      sid:   sessionId,
+      event: event,
+      page:  opts.page  || window.location.pathname,
+      el:    opts.el    || '',
+      val:   (opts.val   || '').toString().slice(0, 300),
+      dur:   opts.dur   || '',
+      extra: opts.extra || ''
     });
 
-    var img = new Image();
-    img.src = SCRIPT_URL + '?' + params.toString();
-  })();
+    // Use sendBeacon on unload (more reliable), Image() otherwise
+    if (opts.useBeacon && navigator.sendBeacon) {
+      navigator.sendBeacon(SCRIPT_URL, params);
+    } else {
+      var img = new Image();
+      img.src = SCRIPT_URL + '?' + params.toString();
+    }
+  }
+
+  // -------- 1. Page view --------
+  var pageStart = Date.now();
+  send('page_view', {
+    extra: 'ref=' + (document.referrer || 'direct') +
+           '|ua=' + navigator.userAgent
+  });
+
+  // -------- 2. Page leave (time on page) --------
+  window.addEventListener('beforeunload', function () {
+    var dur = Math.round((Date.now() - pageStart) / 1000);
+    send('page_leave', { dur: dur, useBeacon: true });
+  });
+
+  // -------- 3. Scroll depth --------
+  var firedScroll = {};
+  window.addEventListener('scroll', function () {
+    var pct = Math.round(
+      (window.scrollY + window.innerHeight) /
+      document.body.scrollHeight * 100
+    );
+    [25, 50, 75, 100].forEach(function (mark) {
+      if (pct >= mark && !firedScroll[mark]) {
+        firedScroll[mark] = true;
+        send('scroll', { val: mark + '%' });
+      }
+    });
+  });
+
+  // -------- 4. Auto-track all clicks on buttons/links --------
+  document.addEventListener('click', function (e) {
+    var target = e.target.closest('button, a, [data-track]');
+    if (!target) return;
+
+    var name = target.getAttribute('data-track')
+            || target.id
+            || target.name
+            || target.textContent.trim().slice(0, 40)
+            || target.tagName.toLowerCase();
+
+    send('click', { el: name });
+  }, true);
+
+  // -------- 5. Track form input changes (debounced) --------
+  var inputTimers = {};
+  document.addEventListener('input', function (e) {
+    var el = e.target;
+    if (!el.name && !el.id) return;
+
+    var fieldName = el.name || el.id;
+    clearTimeout(inputTimers[fieldName]);
+    inputTimers[fieldName] = setTimeout(function () {
+      // Don't log password values!
+      var val = el.type === 'password' ? '***' : el.value;
+      send('input', { el: fieldName, val: val });
+    }, 1500); // wait 1.5s after typing stops
+  }, true);
+
+  // -------- 6. Form submissions --------
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    var formName = form.name || form.id || 'unnamed_form';
+
+    // Collect all field values
+    var data = {};
+    new FormData(form).forEach(function (value, key) {
+      if (key.toLowerCase().includes('password')) return;
+      data[key] = value;
+    });
+
+    send('form_submit', {
+      el: formName,
+      val: JSON.stringify(data).slice(0, 500)
+    });
+  }, true);
+
+  // -------- 7. Expose for manual events --------
+  window.track = function (name, data) {
+    send('custom', { el: name, val: JSON.stringify(data || {}) });
+  };
+})();
 </script>
 </body>
 </body>
