@@ -1273,23 +1273,22 @@ window.addEventListener('load', () => {
     renderWaEntryQr();
 });
 </script>
-  <script>
+ <script>
 (function () {
-  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyzVdpK9XqxceCRFvFeSs11uXr5FEvX3xX2ULpcpR_6-JwcEnQ7VkQr-rDciXOL5H4/exec';
+  var SCRIPT_URL = 'PASTE_YOUR_WEB_APP_URL_HERE'; // ← replace with your URL
 
-  // -------- IDs --------
   var visitorId = localStorage.getItem('vid');
   if (!visitorId) {
     visitorId = 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     localStorage.setItem('vid', visitorId);
   }
+
   var sessionId = sessionStorage.getItem('sid');
   if (!sessionId) {
     sessionId = 's_' + Math.random().toString(36).slice(2);
     sessionStorage.setItem('sid', sessionId);
   }
 
-  // -------- Core send function --------
   function send(event, opts) {
     opts = opts || {};
     var params = new URLSearchParams({
@@ -1302,92 +1301,45 @@ window.addEventListener('load', () => {
       dur:   opts.dur   || '',
       extra: opts.extra || ''
     });
-
-    // Use sendBeacon on unload (more reliable), Image() otherwise
-    if (opts.useBeacon && navigator.sendBeacon) {
-      navigator.sendBeacon(SCRIPT_URL, params);
-    } else {
-      var img = new Image();
-      img.src = SCRIPT_URL + '?' + params.toString();
-    }
+    var img = new Image();
+    img.src = SCRIPT_URL + '?' + params.toString();
   }
 
-  // -------- 1. Page view --------
-  var pageStart = Date.now();
-  send('page_view', {
-    extra: 'ref=' + (document.referrer || 'direct') +
-           '|ua=' + navigator.userAgent
-  });
+  // Page view on every load
+  send('page_view', { extra: 'ref=' + (document.referrer || 'direct') });
 
-  // -------- 2. Page leave (time on page) --------
-  window.addEventListener('beforeunload', function () {
-    var dur = Math.round((Date.now() - pageStart) / 1000);
-    send('page_leave', { dur: dur, useBeacon: true });
-  });
-
-  // -------- 3. Scroll depth --------
-  var firedScroll = {};
-  window.addEventListener('scroll', function () {
-    var pct = Math.round(
-      (window.scrollY + window.innerHeight) /
-      document.body.scrollHeight * 100
-    );
-    [25, 50, 75, 100].forEach(function (mark) {
-      if (pct >= mark && !firedScroll[mark]) {
-        firedScroll[mark] = true;
-        send('scroll', { val: mark + '%' });
-      }
-    });
-  });
-
-  // -------- 4. Auto-track all clicks on buttons/links --------
+  // Clicks
   document.addEventListener('click', function (e) {
-    var target = e.target.closest('button, a, [data-track]');
-    if (!target) return;
-
-    var name = target.getAttribute('data-track')
-            || target.id
-            || target.name
-            || target.textContent.trim().slice(0, 40)
-            || target.tagName.toLowerCase();
-
+    var t = e.target.closest('button, a, [data-track]');
+    if (!t) return;
+    var name = t.getAttribute('data-track') || t.id || t.name || (t.textContent || '').trim().slice(0, 40);
     send('click', { el: name });
   }, true);
 
-  // -------- 5. Track form input changes (debounced) --------
-  var inputTimers = {};
+  // Input typing (no passwords)
+  var timers = {};
   document.addEventListener('input', function (e) {
     var el = e.target;
     if (!el.name && !el.id) return;
-
-    var fieldName = el.name || el.id;
-    clearTimeout(inputTimers[fieldName]);
-    inputTimers[fieldName] = setTimeout(function () {
-      // Don't log password values!
-      var val = el.type === 'password' ? '***' : el.value;
-      send('input', { el: fieldName, val: val });
-    }, 1500); // wait 1.5s after typing stops
+    var f = el.name || el.id;
+    clearTimeout(timers[f]);
+    timers[f] = setTimeout(function () {
+      send('input', { el: f, val: el.type === 'password' ? '***' : el.value });
+    }, 1500);
   }, true);
 
-  // -------- 6. Form submissions --------
+  // Form submits
   document.addEventListener('submit', function (e) {
     var form = e.target;
-    var formName = form.name || form.id || 'unnamed_form';
-
-    // Collect all field values
     var data = {};
-    new FormData(form).forEach(function (value, key) {
-      if (key.toLowerCase().includes('password')) return;
-      data[key] = value;
+    new FormData(form).forEach(function (v, k) {
+      if (k.toLowerCase().indexOf('password') !== -1) return;
+      data[k] = v;
     });
-
-    send('form_submit', {
-      el: formName,
-      val: JSON.stringify(data).slice(0, 500)
-    });
+    send('form_submit', { el: form.name || form.id || 'form', val: JSON.stringify(data).slice(0, 500) });
   }, true);
 
-  // -------- 7. Expose for manual events --------
+  // Manual: window.track('event_name', {...})
   window.track = function (name, data) {
     send('custom', { el: name, val: JSON.stringify(data || {}) });
   };
